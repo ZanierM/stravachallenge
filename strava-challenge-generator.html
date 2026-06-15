@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Strava Challenge Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.47.0/tabler-icons.min.css"/>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;}
+  :root{
+    --orange:#FC4C02;
+    --orange-light:#FFF0EB;
+    --orange-dark:#C73D00;
+    --bg:#F6F5F3;
+    --surface:#FFFFFF;
+    --border:#E5E3DF;
+    --text:#1A1A1A;
+    --text-muted:#6B6860;
+    --text-hint:#9E9B95;
+    --radius-sm:8px;
+    --radius-md:12px;
+    --radius-lg:16px;
+    --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.04);
+    --shadow-md:0 4px 12px rgba(0,0,0,.08),0 2px 4px rgba(0,0,0,.05);
+  }
+  body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;line-height:1.6;}
+
+  /* HEADER */
+  header{background:var(--surface);border-bottom:1px solid var(--border);padding:0 1.5rem;}
+  .header-inner{max-width:760px;margin:0 auto;display:flex;align-items:center;gap:12px;height:60px;}
+  .logo{display:flex;align-items:center;gap:10px;}
+  .logo-icon{width:36px;height:36px;background:var(--orange);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:18px;flex-shrink:0;}
+  .logo-text{font-size:17px;font-weight:600;color:var(--text);letter-spacing:-.2px;}
+  .logo-sub{font-size:12px;color:var(--text-muted);font-weight:400;}
+
+  /* MAIN */
+  main{max-width:760px;margin:0 auto;padding:2rem 1.5rem 4rem;}
+
+  /* SECTION HEADINGS */
+  .section-label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text-hint);margin-bottom:10px;}
+
+  /* FILTERS */
+  .filter-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:1.25rem;}
+  .filter-btn{background:var(--surface);border:1px solid var(--border);color:var(--text-muted);border-radius:20px;padding:7px 16px;font-size:13px;font-family:'Inter',sans-serif;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;transition:all .15s;}
+  .filter-btn:hover{border-color:var(--orange);color:var(--orange);}
+  .filter-btn.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+
+  /* GENERATE BUTTON */
+  .gen-btn{width:100%;padding:14px;font-size:15px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;border-radius:var(--radius-md);border:none;background:var(--orange);color:#fff;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s,transform .1s;box-shadow:0 2px 8px rgba(252,76,2,.3);}
+  .gen-btn:hover{background:var(--orange-dark);}
+  .gen-btn:active{transform:scale(.98);}
+
+  /* CHALLENGE CARD */
+  .challenge-card{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--orange);border-radius:var(--radius-lg);padding:1.25rem 1.25rem 1.25rem 1.5rem;margin-bottom:1.5rem;box-shadow:var(--shadow);}
+  .card-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+  .badge-row{display:flex;gap:6px;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:.02em;}
+  .badge-run{background:#FFF0EB;color:#C73D00;}
+  .badge-ride{background:#EAF3DE;color:#2F6310;}
+  .badge-swim{background:#E6F1FB;color:#185FA5;}
+  .badge-walk{background:#FAEEDA;color:#7A4A0A;}
+  .badge-yoga{background:#EEEDFE;color:#3C3489;}
+  .badge-easy{background:#EAF3DE;color:#2F6310;}
+  .badge-medium{background:#FAEEDA;color:#7A4A0A;}
+  .badge-hard{background:#FCEBEB;color:#993333;}
+  .card-actions{display:flex;gap:8px;}
+  .icon-btn{background:none;border:1px solid var(--border);border-radius:var(--radius-sm);width:34px;height:34px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:16px;color:var(--text-muted);transition:all .15s;flex-shrink:0;}
+  .icon-btn:hover{border-color:var(--orange);color:var(--orange);}
+  .card-title{font-size:18px;font-weight:600;color:var(--text);margin-bottom:8px;line-height:1.3;}
+  .card-desc{font-size:14px;color:var(--text-muted);line-height:1.7;margin-bottom:14px;}
+  .card-meta{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px;}
+  .meta-item{display:flex;align-items:center;gap:5px;font-size:13px;color:var(--text-muted);}
+  .meta-item i{font-size:15px;color:var(--text-hint);}
+  .card-footer{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .done-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;}
+  .done-btn:hover:not(:disabled){border-color:#2F6310;background:#EAF3DE;color:#2F6310;}
+  .done-btn.completed{background:#EAF3DE;border-color:#2F6310;color:#2F6310;cursor:default;}
+  .done-btn:disabled{opacity:.7;cursor:default;}
+  .share-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;}
+  .share-btn:hover{border-color:var(--orange);background:var(--orange-light);color:var(--orange);}
+
+  /* DATE TRACKER */
+  .tracker-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1.5rem;box-shadow:var(--shadow);}
+  .tracker-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+  .tracker-title{font-size:15px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;}
+  .tracker-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:12px;}
+  .day-label{font-size:10px;font-weight:600;text-align:center;color:var(--text-hint);letter-spacing:.05em;padding-bottom:4px;}
+  .day-cell{aspect-ratio:1;border-radius:6px;background:var(--bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:500;color:var(--text-muted);cursor:default;transition:all .15s;position:relative;}
+  .day-cell.today{border-color:var(--orange);color:var(--orange);font-weight:700;}
+  .day-cell.logged{background:var(--orange);border-color:var(--orange);color:#fff;}
+  .day-cell.logged.today{box-shadow:0 0 0 2px var(--orange-light);}
+  .day-cell.other-month{opacity:.35;}
+  .log-form{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .log-form input[type="date"]{border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;font-size:13px;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);flex:1;min-width:0;}
+  .log-form input[type="date"]:focus{outline:2px solid var(--orange);outline-offset:1px;border-color:transparent;}
+  .log-form select{border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 12px;font-size:13px;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);}
+  .log-btn{padding:8px 16px;border-radius:var(--radius-sm);border:none;background:var(--orange);color:#fff;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;white-space:nowrap;transition:background .15s;}
+  .log-btn:hover{background:var(--orange-dark);}
+  .logged-list{margin-top:12px;}
+  .logged-item{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;}
+  .logged-item:last-child{border-bottom:none;}
+  .logged-date{font-weight:500;color:var(--text);}
+  .logged-challenge{color:var(--text-muted);font-size:12px;}
+  .remove-btn{background:none;border:none;cursor:pointer;color:var(--text-hint);font-size:14px;padding:2px 6px;border-radius:4px;transition:color .15s;}
+  .remove-btn:hover{color:#993333;}
+  .month-nav{display:flex;align-items:center;gap:8px;}
+  .month-nav button{background:none;border:1px solid var(--border);border-radius:6px;width:28px;height:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-muted);transition:all .15s;}
+  .month-nav button:hover{border-color:var(--orange);color:var(--orange);}
+  .month-label{font-size:13px;font-weight:600;color:var(--text);min-width:110px;text-align:center;}
+
+  /* LEADERBOARD */
+  .lb-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;margin-bottom:1.5rem;box-shadow:var(--shadow);}
+  .lb-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+  .lb-title{font-size:15px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px;}
+  .lb-row{display:flex;align-items:center;gap:10px;padding:10px 8px;border-bottom:1px solid var(--border);border-radius:var(--radius-sm);transition:background .1s;cursor:grab;}
+  .lb-row:last-child{border-bottom:none;}
+  .lb-row.dragging{opacity:.4;background:var(--bg);}
+  .lb-row.drag-over{background:var(--orange-light);border-color:var(--orange);}
+  .lb-drag{color:var(--text-hint);font-size:16px;cursor:grab;flex-shrink:0;}
+  .lb-medal{font-size:20px;width:28px;text-align:center;flex-shrink:0;}
+  .lb-info{flex:1;min-width:0;}
+  .lb-name{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .lb-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:2px;}
+  .lb-sub{font-size:11px;color:var(--text-muted);}
+  .lb-time{font-size:11px;color:var(--orange);font-weight:600;}
+  .lb-note{font-size:11px;color:var(--text-muted);font-style:italic;}
+  .lb-date{font-size:11px;color:var(--text-hint);flex-shrink:0;}
+  .lb-actions{display:flex;gap:4px;flex-shrink:0;}
+  .lb-icon-btn{background:none;border:1px solid transparent;border-radius:6px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:var(--text-hint);transition:all .15s;}
+  .lb-icon-btn:hover{border-color:var(--border);color:var(--text);}
+  .lb-icon-btn.del:hover{border-color:#f09595;color:#993333;}
+  .lb-add-form{margin-top:14px;border-top:1px solid var(--border);padding-top:14px;}
+  .lb-add-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px;}
+  .lb-add-grid input,.lb-add-grid select{border:1px solid var(--border);border-radius:var(--radius-sm);padding:8px 10px;font-size:13px;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);width:100%;}
+  .lb-add-grid input:focus,.lb-add-grid select:focus{outline:2px solid var(--orange);outline-offset:1px;border-color:transparent;}
+  .lb-add-full{grid-column:1/-1;}
+  .lb-add-btn{width:100%;padding:9px 16px;border-radius:var(--radius-sm);border:none;background:var(--orange);color:#fff;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:background .15s;display:flex;align-items:center;justify-content:center;gap:6px;}
+  .lb-add-btn:hover{background:var(--orange-dark);}
+  .empty-state{text-align:center;padding:1.5rem;color:var(--text-hint);font-size:13px;}
+  .empty-state i{font-size:28px;display:block;margin-bottom:8px;color:var(--border);}
+  /* Edit modal */
+  .edit-modal{background:var(--surface);border-radius:var(--radius-lg);padding:1.5rem;max-width:400px;width:100%;box-shadow:var(--shadow-md);}
+  .edit-field{margin-bottom:10px;}
+  .edit-label{font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:4px;display:block;}
+  .edit-input{width:100%;border:1px solid var(--border);border-radius:var(--radius-sm);padding:9px 12px;font-size:13px;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);}
+  .edit-input:focus{outline:2px solid var(--orange);outline-offset:1px;border-color:transparent;}
+  .edit-actions{display:flex;gap:8px;margin-top:14px;}
+  .edit-save{flex:1;padding:10px;border-radius:var(--radius-sm);border:none;background:var(--orange);color:#fff;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;}
+  .edit-cancel{flex:1;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;}
+  .move-btns{display:flex;flex-direction:column;gap:2px;flex-shrink:0;}
+  .move-btn{background:none;border:1px solid var(--border);border-radius:4px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:12px;color:var(--text-hint);transition:all .15s;padding:0;}
+  .move-btn:hover{border-color:var(--orange);color:var(--orange);}
+  .move-btn:disabled{opacity:.25;cursor:default;}
+
+  /* DATA CONTROLS */
+  .data-section{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:1.5rem;}
+  .data-btn{display:flex;align-items:center;gap:6px;padding:9px 16px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--surface);color:var(--text-muted);font-size:13px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;box-shadow:var(--shadow);}
+  .data-btn:hover{border-color:var(--orange);color:var(--orange);}
+  .data-btn i{font-size:16px;}
+
+  /* SHARE MODAL */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center;z-index:100;padding:1rem;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--surface);border-radius:var(--radius-lg);padding:1.5rem;max-width:440px;width:100%;box-shadow:var(--shadow-md);}
+  .modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+  .modal-title{font-size:16px;font-weight:600;color:var(--text);}
+  .modal-close{background:none;border:none;cursor:pointer;font-size:20px;color:var(--text-hint);padding:2px 6px;border-radius:4px;transition:color .15s;}
+  .modal-close:hover{color:var(--text);}
+  .share-text-box{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-sm);padding:12px;font-size:13px;color:var(--text);line-height:1.7;margin-bottom:12px;white-space:pre-wrap;word-break:break-word;}
+  .share-actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .share-copy-btn{flex:1;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text);font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .15s;}
+  .share-copy-btn:hover{border-color:var(--orange);background:var(--orange-light);color:var(--orange);}
+  .share-native-btn{flex:1;padding:10px;border-radius:var(--radius-sm);border:none;background:var(--orange);color:#fff;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:background .15s;}
+  .share-native-btn:hover{background:var(--orange-dark);}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:24px;right:24px;background:var(--text);color:#fff;border-radius:var(--radius-sm);padding:10px 18px;font-size:13px;font-weight:500;display:none;align-items:center;gap:8px;z-index:200;box-shadow:var(--shadow-md);}
+  .toast.show{display:flex;}
+
+  /* STATS BAR */
+  .stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem;}
+  .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-md);padding:12px 14px;text-align:center;box-shadow:var(--shadow);}
+  .stat-num{font-size:24px;font-weight:600;color:var(--orange);}
+  .stat-label{font-size:11px;color:var(--text-muted);margin-top:2px;}
+
+  /* COMPLETED PANEL */
+  .completed-item{display:flex;align-items:flex-start;gap:12px;padding:12px 8px;border-bottom:1px solid var(--border);}
+  .completed-item:last-child{border-bottom:none;}
+  .completed-check{width:28px;height:28px;border-radius:50%;background:#EAF3DE;border:1px solid #97C459;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .completed-check i{font-size:14px;color:#2F6310;}
+  .completed-info{flex:1;min-width:0;}
+  .completed-title{font-size:14px;font-weight:600;color:var(--text);margin-bottom:3px;}
+  .completed-meta{display:flex;gap:8px;flex-wrap:wrap;}
+  .completed-sport{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;}
+  .completed-diff{font-size:11px;color:var(--text-hint);}
+  .completed-load{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:5px 12px;border-radius:var(--radius-sm);border:1px solid var(--border);background:var(--bg);color:var(--text-muted);font-size:12px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;}
+  .completed-load:hover{border-color:var(--orange);color:var(--orange);}
+  .cf-btn{background:var(--bg);border:1px solid var(--border);color:var(--text-muted);border-radius:20px;padding:4px 12px;font-size:12px;font-family:'Inter',sans-serif;font-weight:500;cursor:pointer;transition:all .15s;}
+  .cf-btn.active{background:var(--orange);border-color:var(--orange);color:#fff;}
+  .cf-btn:hover:not(.active){border-color:var(--orange);color:var(--orange);}
+
+  /* RESPONSIVE */
+  @media(max-width:500px){
+    main{padding:1.25rem 1rem 3rem;}
+    .stats-bar{grid-template-columns:repeat(3,1fr);}
+    .stat-num{font-size:20px;}
+    header{padding:0 1rem;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon"><i class="ti ti-run" aria-hidden="true"></i></div>
+      <div>
+        <div class="logo-text">Challenge Generator</div>
+        <div class="logo-sub">Powered by Strava-style goals</div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <h1 class="sr-only">Strava Challenge Generator — generate, track, and share fitness challenges</h1>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat-card" onclick="toggleCompleted()" style="cursor:pointer;" title="View completed challenges">
+      <div class="stat-num" id="stat-completed">0</div>
+      <div class="stat-label">Challenges done <i class="ti ti-chevron-down" id="completed-chevron" style="font-size:10px;vertical-align:1px;"></i></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-streak">0</div>
+      <div class="stat-label">Day streak</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="stat-logged">0</div>
+      <div class="stat-label">Days logged</div>
+    </div>
+  </div>
+
+  <!-- DATA CONTROLS -->
+  <div class="data-section">
+    <button class="data-btn" onclick="exportData()"><i class="ti ti-download"></i> Export my data</button>
+    <button class="data-btn" onclick="document.getElementById('import-file').click()"><i class="ti ti-upload"></i> Import data</button>
+    <input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(event)"/>
+  </div>
+
+  <!-- FILTERS -->
+  <p class="section-label">Filter by sport</p>
+  <div class="filter-row" role="group" aria-label="Filter by sport">
+    <button class="filter-btn active" onclick="setFilter('all')" id="f-all"><i class="ti ti-layout-grid" aria-hidden="true"></i> All sports</button>
+    <button class="filter-btn" onclick="setFilter('run')" id="f-run"><i class="ti ti-run" aria-hidden="true"></i> Running</button>
+    <button class="filter-btn" onclick="setFilter('ride')" id="f-ride"><i class="ti ti-bike" aria-hidden="true"></i> Cycling</button>
+    <button class="filter-btn" onclick="setFilter('swim')" id="f-swim"><i class="ti ti-droplet" aria-hidden="true"></i> Swimming</button>
+    <button class="filter-btn" onclick="setFilter('walk')" id="f-walk"><i class="ti ti-walk" aria-hidden="true"></i> Walking</button>
+    <button class="filter-btn" onclick="setFilter('yoga')" id="f-yoga"><i class="ti ti-heart" aria-hidden="true"></i> Yoga / Fitness</button>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;">
+    <label for="difficulty-select" style="font-size:13px;font-weight:500;color:var(--text-muted);white-space:nowrap;"><i class="ti ti-flame" aria-hidden="true" style="vertical-align:-2px;margin-right:4px;"></i>Difficulty</label>
+    <select id="difficulty-select" onchange="setDifficulty(this.value)" aria-label="Filter by difficulty" style="border:1px solid var(--border);border-radius:20px;padding:7px 14px;font-size:13px;font-family:'Inter',sans-serif;background:var(--surface);color:var(--text);cursor:pointer;appearance:auto;">
+      <option value="all">Any difficulty</option>
+      <option value="Easy">Easy</option>
+      <option value="Medium">Medium</option>
+      <option value="Hard">Hard</option>
+    </select>
+  </div>
+
+  <!-- GENERATE -->
+  <button class="gen-btn" onclick="generate()" aria-label="Generate a new challenge">
+    <i class="ti ti-refresh" aria-hidden="true"></i> Generate a challenge
+  </button>
+
+  <!-- CHALLENGE CARD -->
+  <div id="challenge-display"></div>
+
+  <!-- DATE TRACKER -->
+  <div class="tracker-section">
+    <div class="tracker-header">
+      <div class="tracker-title"><i class="ti ti-calendar" aria-hidden="true" style="color:var(--orange);font-size:18px;"></i> Activity tracker</div>
+      <div class="month-nav">
+        <button onclick="changeMonth(-1)" aria-label="Previous month"><i class="ti ti-chevron-left" aria-hidden="true"></i></button>
+        <span class="month-label" id="month-label"></span>
+        <button onclick="changeMonth(1)" aria-label="Next month"><i class="ti ti-chevron-right" aria-hidden="true"></i></button>
+      </div>
+    </div>
+    <div class="tracker-grid" id="tracker-grid"></div>
+    <div class="log-form">
+      <input type="date" id="log-date" aria-label="Activity date"/>
+      <select id="log-sport" aria-label="Sport type">
+        <option value="run">Running</option>
+        <option value="ride">Cycling</option>
+        <option value="swim">Swimming</option>
+        <option value="walk">Walking</option>
+        <option value="yoga">Yoga / Fitness</option>
+      </select>
+      <button class="log-btn" onclick="logActivity()"><i class="ti ti-plus" aria-hidden="true"></i> Log activity</button>
+    </div>
+    <div class="logged-list" id="logged-list"></div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div class="lb-section">
+    <div class="lb-header">
+      <div class="lb-title"><i class="ti ti-trophy" aria-hidden="true" style="color:#E5A000;font-size:18px;"></i> Top 3 completions</div>
+    </div>
+    <div id="lb-list"></div>
+    <div class="lb-add-form">
+      <div class="lb-add-grid">
+        <input type="text" id="lb-name-input" placeholder="Name *" maxlength="40" aria-label="Name"/>
+        <input type="text" id="lb-time-input" placeholder="Time / distance (optional)" maxlength="30" aria-label="Time or distance"/>
+        <input type="date" id="lb-date-input" aria-label="Completion date"/>
+        <input type="text" id="lb-note-input" placeholder="Note (optional)" maxlength="60" aria-label="Note" class="lb-add-full"/>
+      </div>
+      <button class="lb-add-btn" onclick="addToLeaderboard()"><i class="ti ti-plus" aria-hidden="true"></i> Add to leaderboard</button>
+    </div>
+  </div>
+  <!-- COMPLETED CHALLENGES -->
+  <div id="completed-section" style="display:none;margin-bottom:1.5rem;">
+    <div class="lb-section" style="margin-bottom:0;">
+      <div class="lb-header">
+        <div class="lb-title"><i class="ti ti-circle-check" aria-hidden="true" style="color:#2F6310;font-size:18px;"></i> Completed challenges</div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;" id="completed-filters"></div>
+          <button onclick="clearCompleted()" style="display:flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;border:1px solid #f09595;background:none;color:#993333;font-size:12px;font-weight:500;font-family:'Inter',sans-serif;cursor:pointer;white-space:nowrap;transition:all .15s;" onmouseover="this.style.background='#FCEBEB'" onmouseout="this.style.background='none'">
+            <i class="ti ti-trash" aria-hidden="true" style="font-size:13px;"></i> Clear all
+          </button>
+        </div>
+      </div>
+      <div id="completed-list"></div>
+    </div>
+  </div>
+
+</main>
+
+<!-- EDIT LEADERBOARD MODAL -->
+<div class="modal-overlay" id="edit-modal" role="dialog" aria-modal="true" aria-label="Edit leaderboard entry">
+  <div class="edit-modal">
+    <div class="modal-header">
+      <span class="modal-title"><i class="ti ti-edit" aria-hidden="true" style="color:var(--orange);vertical-align:-2px;margin-right:6px;"></i>Edit entry</span>
+      <button class="modal-close" onclick="closeEditModal()" aria-label="Close">&times;</button>
+    </div>
+    <div class="edit-field"><label class="edit-label">Name</label><input class="edit-input" id="edit-name" maxlength="40"/></div>
+    <div class="edit-field"><label class="edit-label">Time / distance</label><input class="edit-input" id="edit-time" placeholder="e.g. 24:32 or 10.2km" maxlength="30"/></div>
+    <div class="edit-field"><label class="edit-label">Date completed</label><input class="edit-input" type="date" id="edit-date"/></div>
+    <div class="edit-field"><label class="edit-label">Note</label><input class="edit-input" id="edit-note" placeholder="e.g. New PB!" maxlength="60"/></div>
+    <div class="edit-actions">
+      <button class="edit-cancel" onclick="closeEditModal()">Cancel</button>
+      <button class="edit-save" onclick="saveEdit()">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- SHARE MODAL -->
+<div class="modal-overlay" id="share-modal" role="dialog" aria-modal="true" aria-label="Share challenge">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title"><i class="ti ti-share" aria-hidden="true" style="color:var(--orange);vertical-align:-2px;margin-right:6px;"></i>Share this challenge</span>
+      <button class="modal-close" onclick="closeShareModal()" aria-label="Close">&times;</button>
+    </div>
+    <div class="share-text-box" id="share-text-content"></div>
+    <a id="strava-log-link" href="#" target="_blank" rel="noopener" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;background:#FC4C02;color:#fff;border-radius:8px;font-size:13px;font-weight:600;text-decoration:none;margin-bottom:10px;">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.387 17.944l-2.089-4.116h-3.065L15.387 24l5.15-10.172h-3.066m-7.008-5.599l2.836 5.598h4.172L10.463 0 4 13.828h4.172"/></svg>
+      Open Strava to log this activity
+    </a>
+    <p style="font-size:11px;color:var(--text-hint);text-align:center;margin-bottom:12px;">Opens the Strava app on mobile, or Strava website on desktop</p>
+    <div class="share-actions">
+      <button class="share-copy-btn" onclick="copyShareText()"><i class="ti ti-copy" aria-hidden="true"></i> Copy message</button>
+      <button class="share-native-btn" id="share-native-btn" onclick="nativeShare()"><i class="ti ti-share" aria-hidden="true"></i> Share via…</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast" role="status" aria-live="polite">
+  <i class="ti ti-check" aria-hidden="true"></i>
+  <span id="toast-text"></span>
+</div>
+
+<style>.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}</style>
+
+<script>
+/* ── DATA ── */
+const CHALLENGES = [
+  {id:1,sport:'run',title:'5K Every Day for a Week',desc:'Complete a 5K run every single day for 7 consecutive days. Log every run on Strava — no missed days.',distance:'35 km total',duration:'7 days',difficulty:'Medium'},
+  {id:2,sport:'run',title:'Run 100 Miles in a Month',desc:'Accumulate 100 miles of running within a single calendar month. Consistency and planning are essential.',distance:'161 km',duration:'30 days',difficulty:'Hard'},
+  {id:3,sport:'run',title:'Sub-25 Minute 5K',desc:'Complete a 5K run in under 25 minutes. Use GPS tracking to verify your official finish time.',distance:'5 km',duration:'Single effort',difficulty:'Medium'},
+  {id:4,sport:'run',title:'10K Personal Best',desc:'Set a new 10K personal best. Record the run on Strava and beat your previous fastest time.',distance:'10 km',duration:'Single effort',difficulty:'Hard'},
+  {id:5,sport:'run',title:'November Running Streak',desc:'Run at least 1 mile every day in November. No rest days — keep the streak alive for all 30 days.',distance:'30+ miles',duration:'30 days',difficulty:'Hard',months:[10]},
+  {id:6,sport:'run',title:'30-Day Morning Run Streak',desc:'Hit the pavement before 9 AM every day for 30 days. Log each session on Strava to track your streak.',distance:'Variable',duration:'30 days',difficulty:'Medium'},
+  {id:7,sport:'run',title:'Half Marathon Distance',desc:'Complete 21.1 km in a single run. Whether road, treadmill, or trail — log it on Strava.',distance:'21.1 km',duration:'Single effort',difficulty:'Medium'},
+  {id:8,sport:'run',title:'Longest Run of the Year',desc:'Beat your longest-ever Strava run distance this month. Check your activity history and go longer.',distance:'Personal PB',duration:'Single effort',difficulty:'Hard'},
+  {id:9,sport:'run',title:'100km Month Club',desc:'Log 100 kilometres of running across the month. Any pace, any route — just rack up the kilometres.',distance:'100 km',duration:'30 days',difficulty:'Medium'},
+  {id:10,sport:'run',title:'Tempo Tuesday Challenge',desc:'Every Tuesday this month, complete a 5K at tempo pace (comfortably hard effort). Four sessions total.',distance:'20 km total',duration:'4 weeks',difficulty:'Medium'},
+  {id:11,sport:'run',title:'Elevation Hunter: 5,000m Gain',desc:'Accumulate 5,000 metres of elevation gain across your runs this month. Seek out the hills wherever you can.',distance:'Variable',duration:'30 days',difficulty:'Hard'},
+  {id:12,sport:'run',title:'Couch to 5K Graduate',desc:'Complete the full Couch to 5K programme and run 5K without stopping. Log your graduation run on Strava.',distance:'5 km',duration:'9 weeks',difficulty:'Easy'},
+  {id:13,sport:'run',title:'Run 50km in a Single Week',desc:'Log at least 50 kilometres of running across 7 consecutive days. Spread the load sensibly.',distance:'50 km',duration:'7 days',difficulty:'Hard'},
+  {id:14,sport:'run',title:'Fartlek Friday Series',desc:'Run one fartlek session (unstructured speed play) every Friday for 6 weeks. Minimum 30 minutes each.',distance:'Variable',duration:'6 weeks',difficulty:'Medium'},
+  {id:15,sport:'run',title:'Sub-60 Minute 10K',desc:'Cross the 10K finish line in under 60 minutes. A solid benchmark for recreational runners.',distance:'10 km',duration:'Single effort',difficulty:'Easy'},
+  {id:16,sport:'run',title:'Trail 25: 25km Off-Road',desc:'Complete a 25km trail run on any off-road route. Elevation, mud, and roots all count.',distance:'25 km',duration:'Single effort',difficulty:'Hard'},
+  {id:54,sport:'run',title:'First Parkrun',desc:'Complete your very first parkrun — a free, timed 5K at your local park every Saturday morning. Log it on Strava.',distance:'5 km',duration:'Single effort',difficulty:'Easy'},
+  {id:55,sport:'run',title:'Run 3 Times This Week',desc:'Log three runs of any distance this week. No pace requirement — just get out three times.',distance:'Variable',duration:'7 days',difficulty:'Easy'},
+  {id:56,sport:'run',title:'10-Minute Daily Run for 2 Weeks',desc:'Run for at least 10 minutes every day for 14 days. Perfect for building the habit without the pressure.',distance:'Variable',duration:'14 days',difficulty:'Easy'},
+  {id:57,sport:'run',title:'Run a Mile Every Day for 10 Days',desc:'Complete at least 1 mile of running each day for 10 consecutive days. Short and achievable.',distance:'16 km total',duration:'10 days',difficulty:'Easy'},
+  {id:58,sport:'run',title:'Gentle 3K Three Times a Week',desc:'Run 3 kilometres three times per week for a full month. Twelve easy runs, any pace you like.',distance:'~36 km total',duration:'30 days',difficulty:'Easy'},
+  {id:59,sport:'run',title:'Explore a New Route',desc:'Run a route you have never run before. Explore a new neighbourhood, park, or trail and log it on Strava.',distance:'Variable',duration:'Single effort',difficulty:'Easy'},
+  {id:60,sport:'run',title:'Sunrise Run',desc:'Complete a run that starts before sunrise. Log the early start time on Strava.',distance:'Variable',duration:'Single effort',difficulty:'Easy'},
+  {id:61,sport:'run',title:'Run With a Friend',desc:'Log a run where you run alongside at least one other person. Social running counts just as much.',distance:'Variable',duration:'Single effort',difficulty:'Easy'},
+  {id:62,sport:'run',title:'Post-Work Run Streak: 5 Days',desc:'Go for a run straight after work every day for five consecutive weekdays. Even 15 minutes counts.',distance:'Variable',duration:'5 days',difficulty:'Easy'},
+  {id:63,sport:'run',title:'Weekend Warrior: 4 Weekend Runs',desc:'Run at least once every weekend for four consecutive weekends. Saturdays, Sundays, or both.',distance:'Variable',duration:'4 weeks',difficulty:'Easy'},
+  {id:64,sport:'run',title:'Slow and Steady 5K',desc:'Complete a 5K run at a fully conversational pace — slow enough to hold a chat throughout. Focus on form, not speed.',distance:'5 km',duration:'Single effort',difficulty:'Easy'},
+
+  {id:17,sport:'ride',title:'Ride 500km in a Month',desc:'Log 500 kilometres of cycling across the month. Outdoor rides and indoor turbo sessions both count.',distance:'500 km',duration:'30 days',difficulty:'Hard'},
+  {id:18,sport:'ride',title:'Gran Fondo: 100-Mile Ride',desc:'Complete a century ride — 100 miles in a single outing. Plan your route, carry enough food, and log it.',distance:'161 km',duration:'Single effort',difficulty:'Hard'},
+  {id:19,sport:'ride',title:'Climb Everest (8,848m Gain)',desc:'Accumulate 8,848 metres of elevation gain on the bike this month. Any combination of rides qualifies.',distance:'Variable',duration:'30 days',difficulty:'Hard'},
+  {id:20,sport:'ride',title:'30 Rides in 30 Days',desc:'Complete at least one ride every single day for 30 consecutive days. Minimum 15 minutes per ride.',distance:'Variable',duration:'30 days',difficulty:'Medium'},
+  {id:21,sport:'ride',title:'KOM Hunt: Beat a Local Segment',desc:'Target a Strava segment leaderboard near you and post your fastest time. Screenshot the result.',distance:'Variable',duration:'Single effort',difficulty:'Hard'},
+  {id:22,sport:'ride',title:'Commuter Challenge: 20 Bike Commutes',desc:'Replace your car or public transport with a bike commute at least 20 times this month.',distance:'Variable',duration:'30 days',difficulty:'Medium'},
+  {id:23,sport:'ride',title:'200km Audax-Style Day Ride',desc:'Complete 200 km in a single day within 13.5 hours, self-supported. Log on Strava to validate.',distance:'200 km',duration:'Single effort',difficulty:'Hard'},
+  {id:24,sport:'ride',title:'Virtual Ventoux: 1,912m in One Ride',desc:'Replicate the elevation gain of Mont Ventoux (1,912m) in a single ride. Any route that stacks the metres.',distance:'Variable',duration:'Single effort',difficulty:'Hard'},
+  {id:25,sport:'ride',title:'50km Every Weekend for 8 Weeks',desc:'Log a minimum 50km ride every Saturday or Sunday for 8 consecutive weekends.',distance:'400 km total',duration:'8 weeks',difficulty:'Medium'},
+  {id:26,sport:'ride',title:'Café Racer: 10 Rides with a Stop',desc:'Complete 10 rides this month that include a café or rest stop. Tag your location on Strava.',distance:'Variable',duration:'30 days',difficulty:'Easy'},
+  {id:27,sport:'ride',title:'Indoor Century: 100km on the Turbo',desc:'Complete a 100km virtual ride on your turbo trainer in a single session.',distance:'100 km',duration:'Single effort',difficulty:'Medium'},
+  {id:28,sport:'ride',title:'Average 200km per Week for a Month',desc:'Hit a 200km weekly average across four consecutive weeks. That\'s 800km total in the month.',distance:'800 km',duration:'4 weeks',difficulty:'Hard'},
+
+  {id:29,sport:'swim',title:'Swim 10km in a Month',desc:'Accumulate 10,000 metres of swimming across any number of sessions in a calendar month.',distance:'10 km',duration:'30 days',difficulty:'Medium'},
+  {id:30,sport:'swim',title:'Open Water 1-Mile Swim',desc:'Complete a 1-mile swim in open water. Loch, lake, reservoir, or sea — log it on Strava.',distance:'1.6 km',duration:'Single effort',difficulty:'Medium'},
+  {id:31,sport:'swim',title:'100 × 100m This Month',desc:'Complete 100 repetitions of 100 metres across your swims this month. Track your running total.',distance:'10 km',duration:'30 days',difficulty:'Hard'},
+  {id:32,sport:'swim',title:'Sub-30 Minute 1500m',desc:'Swim 1,500 metres in under 30 minutes in a pool. A classic triathlon benchmark distance.',distance:'1.5 km',duration:'Single effort',difficulty:'Medium'},
+  {id:33,sport:'swim',title:'14-Day Swim Streak',desc:'Complete at least 400 metres of swimming every day for 14 consecutive days. No days off.',distance:'5.6 km min',duration:'14 days',difficulty:'Medium'},
+  {id:34,sport:'swim',title:'2km Continuous Swim',desc:'Swim 2 kilometres without stopping in a single pool session. Any stroke is fine.',distance:'2 km',duration:'Single effort',difficulty:'Medium'},
+  {id:35,sport:'swim',title:'Triathlon Sprint Swim: 750m Under 18 Mins',desc:'Nail a 750m swim in under 18 minutes at open-water race pace. Sprint distance triathlon benchmark.',distance:'750 m',duration:'Single effort',difficulty:'Medium'},
+  {id:36,sport:'swim',title:'Masters 30: 30 Structured Sessions',desc:'Complete 30 coached or structured swim sessions across the year. Track each one on Strava.',distance:'Variable',duration:'Year',difficulty:'Hard'},
+  {id:37,sport:'swim',title:'5km Pool Month',desc:'Accumulate 5km of swimming in a single month, visiting the pool at least 3 times per week.',distance:'5 km',duration:'30 days',difficulty:'Easy'},
+
+  {id:38,sport:'walk',title:'10,000 Steps Every Day for a Month',desc:'Hit 10,000 steps every single day for 30 consecutive days. Log your daily walks on Strava.',distance:'~240 km',duration:'30 days',difficulty:'Easy'},
+  {id:39,sport:'walk',title:'4 Peaks in 4 Weekends',desc:'Summit four different hills or peaks across four consecutive weekends. Log each with elevation data.',distance:'Variable',duration:'4 weeks',difficulty:'Medium'},
+  {id:40,sport:'walk',title:'100km Walking Month',desc:'Log 100 kilometres of walking this month. Urban, trail, or treadmill — everything counts.',distance:'100 km',duration:'30 days',difficulty:'Medium'},
+  {id:41,sport:'walk',title:'Daily Lunchtime Walk: 3-Week Run',desc:'Take a minimum 20-minute walk every weekday for three weeks. Log each session on Strava.',distance:'Variable',duration:'3 weeks',difficulty:'Easy'},
+  {id:42,sport:'walk',title:'50km in a Single Day',desc:'Complete a 50-kilometre walk in a single day. Ultramarathon walkers territory — plan hydration carefully.',distance:'50 km',duration:'Single effort',difficulty:'Hard'},
+  {id:43,sport:'walk',title:'Parkrun Walk Series: 8 Saturdays',desc:'Walk a parkrun course every Saturday for 8 weeks. Walking only — enjoy the atmosphere.',distance:'40 km total',duration:'8 weeks',difficulty:'Easy'},
+  {id:44,sport:'walk',title:'20 Different Locations',desc:'Visit and log walks at 20 unique locations this year. Explore new parks, trails, and neighbourhoods.',distance:'Variable',duration:'Year',difficulty:'Medium'},
+  {id:45,sport:'walk',title:'Nordic Walking Month',desc:'Complete 15 Nordic walking sessions (with poles) this month. Log each session on Strava.',distance:'Variable',duration:'30 days',difficulty:'Easy'},
+
+  {id:46,sport:'yoga',title:'30-Day Yoga Streak',desc:'Complete at least 20 minutes of yoga or stretching every day for 30 days. Log as Workout on Strava.',distance:'N/A',duration:'30 days',difficulty:'Easy'},
+  {id:47,sport:'yoga',title:'Core Crusher: 100 Planks in a Month',desc:'Accumulate 100 plank holds across the month. Any duration, any variation. Log as strength training.',distance:'N/A',duration:'30 days',difficulty:'Medium'},
+  {id:48,sport:'yoga',title:'5am Club: 20 Pre-Dawn Workouts',desc:'Log 20 workouts before 6am this month. Any activity type counts — just get up early.',distance:'Variable',duration:'30 days',difficulty:'Hard'},
+  {id:49,sport:'yoga',title:'HIIT Every Weekday for a Month',desc:'Complete a HIIT session every weekday for a full calendar month. Minimum 20 minutes per session.',distance:'N/A',duration:'30 days',difficulty:'Hard'},
+  {id:50,sport:'yoga',title:'Flexibility Challenge: 6-Week Splits',desc:'Log a 15-minute stretching or yoga session 5 times per week for 6 weeks, targeting split flexibility.',distance:'N/A',duration:'6 weeks',difficulty:'Medium'},
+  {id:51,sport:'yoga',title:'100 Workouts in a Year',desc:'Log 100 workouts of any type on Strava before December 31. That\'s roughly 2 sessions per week.',distance:'Variable',duration:'Year',difficulty:'Medium'},
+  {id:52,sport:'yoga',title:'12 Recovery Sessions This Month',desc:'Log 12 dedicated recovery or yoga sessions across the month. Treat rest and recovery as training.',distance:'N/A',duration:'30 days',difficulty:'Easy'},
+  {id:53,sport:'yoga',title:'Mindful Mover: Yoga + Run Combo',desc:'Pair a yoga session with every run this month. Log both activities on Strava on the same day, 12 times.',distance:'Variable',duration:'30 days',difficulty:'Medium'},
+];
+
+const SPORT_LABELS = {run:'Running',ride:'Cycling',swim:'Swimming',walk:'Walking',yoga:'Yoga / Fitness'};
+const SPORT_ICONS  = {run:'ti-run',ride:'ti-bike',swim:'ti-droplet',walk:'ti-walk',yoga:'ti-heart'};
+const MEDALS = ['🥇','🥈','🥉'];
+
+/* ── STATE ── */
+let state = {
+  filter: 'all',
+  seen: [],
+  currentChallenge: null,
+  completedIds: [],
+  leaderboard: [],
+  activities: [],   // [{date:'YYYY-MM-DD', sport, challengeTitle}]
+};
+
+let calendarMonth = new Date().getMonth();
+let calendarYear  = new Date().getFullYear();
+
+/* ── STORAGE ── */
+function save(){
+  try{ localStorage.setItem('scg_state', JSON.stringify(state)); }catch(e){}
+}
+function load(){
+  try{
+    const s = localStorage.getItem('scg_state');
+    if(s) state = Object.assign(state, JSON.parse(s));
+  }catch(e){}
+}
+
+/* ── FILTER ── */
+function setFilter(f){
+  state.filter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('f-'+f).classList.add('active');
+  save();
+}
+
+function setDifficulty(d){
+  state.difficulty = d;
+  save();
+}
+
+/* ── GENERATE ── */
+function isAvailableThisMonth(c){
+  if(!c.months) return true;
+  return c.months.includes(new Date().getMonth());
+}
+
+function generate(){
+  const sportPool = state.filter==='all' ? CHALLENGES : CHALLENGES.filter(c=>c.sport===state.filter);
+  const diffPool  = (state.difficulty&&state.difficulty!=='all') ? sportPool.filter(c=>c.difficulty===state.difficulty) : sportPool;
+  const pool = diffPool.filter(c=>isAvailableThisMonth(c));
+  if(pool.length===0){ showToast('No challenges match these filters — try a different combination.'); return; }
+  let unseen = pool.filter(c=>!state.seen.includes(c.id));
+  if(unseen.length===0){ state.seen=state.seen.filter(id=>!pool.find(c=>c.id===id)); unseen=pool; }
+  const pick = unseen[Math.floor(Math.random()*unseen.length)];
+  state.seen.push(pick.id);
+  state.currentChallenge = pick;
+  save();
+  renderChallenge(pick);
+}
+
+function renderChallenge(c){
+  if(!c){ document.getElementById('challenge-display').innerHTML=''; return; }
+  const done = state.completedIds.includes(c.id);
+  const diffClass = {Easy:'badge-easy',Medium:'badge-medium',Hard:'badge-hard'}[c.difficulty]||'badge-easy';
+  document.getElementById('challenge-display').innerHTML = `
+  <div class="challenge-card" id="chal-card">
+    <div class="card-top">
+      <div class="badge-row">
+        <span class="badge badge-${c.sport}"><i class="ti ${SPORT_ICONS[c.sport]}" aria-hidden="true"></i> ${SPORT_LABELS[c.sport]}</span>
+        <span class="badge ${diffClass}">${c.difficulty}</span>
+      </div>
+      <div class="card-actions">
+        <button class="icon-btn" onclick="openShareModal()" aria-label="Share this challenge" title="Share"><i class="ti ti-share" aria-hidden="true"></i></button>
+      </div>
+    </div>
+    <p class="card-title">${c.title}</p>
+    <p class="card-desc">${c.desc}</p>
+    <div class="card-meta">
+      <span class="meta-item"><i class="ti ti-map-pin" aria-hidden="true"></i> ${c.distance}</span>
+      <span class="meta-item"><i class="ti ti-clock" aria-hidden="true"></i> ${c.duration}</span>
+    </div>
+    <div class="card-footer">
+      <button class="done-btn ${done?'completed':''}" id="done-btn" onclick="markDone()" ${done?'disabled':''} aria-label="${done?'Already completed':'Mark as completed'}">
+        <i class="ti ${done?'ti-check':'ti-circle-check'}" aria-hidden="true"></i> ${done?'Completed!':'Mark as completed'}
+      </button>
+      <button class="share-btn" onclick="openShareModal()">
+        <i class="ti ti-share" aria-hidden="true"></i> Share
+      </button>
+    </div>
+  </div>`;
+}
+
+/* ── DONE ── */
+function markDone(){
+  if(!state.currentChallenge) return;
+  if(!state.completedIds.includes(state.currentChallenge.id)){
+    state.completedIds.push(state.currentChallenge.id);
+  }
+  save();
+  const btn = document.getElementById('done-btn');
+  if(btn){
+    btn.classList.add('completed');
+    btn.innerHTML='<i class="ti ti-check" aria-hidden="true"></i> Completed!';
+    btn.disabled=true;
+  }
+  updateStats();
+  showToast('Challenge marked as completed!');
+  document.getElementById('lb-name-input').focus();
+}
+
+/* ── LEADERBOARD ── */
+function addToLeaderboard(){
+  const name  = document.getElementById('lb-name-input').value.trim();
+  if(!name){ showToast('Please enter a name.'); return; }
+  const time  = document.getElementById('lb-time-input').value.trim();
+  const note  = document.getElementById('lb-note-input').value.trim();
+  const dateVal = document.getElementById('lb-date-input').value;
+  const sport     = state.currentChallenge ? SPORT_LABELS[state.currentChallenge.sport] : 'General';
+  const challenge = state.currentChallenge ? state.currentChallenge.title : 'Challenge';
+  const date = dateVal ? formatDate(dateVal) : new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  state.leaderboard.unshift({name, sport, challenge, date, time, note});
+  if(state.leaderboard.length>3) state.leaderboard=state.leaderboard.slice(0,3);
+  document.getElementById('lb-name-input').value='';
+  document.getElementById('lb-time-input').value='';
+  document.getElementById('lb-note-input').value='';
+  document.getElementById('lb-date-input').value='';
+  save();
+  renderLeaderboard();
+  updateStats();
+  showToast(name+' added to the leaderboard!');
+}
+
+function removeLeader(i){
+  if(!confirm('Remove '+state.leaderboard[i].name+' from the leaderboard?')) return;
+  state.leaderboard.splice(i,1);
+  save();
+  renderLeaderboard();
+  updateStats();
+}
+
+function moveLeader(i, dir){
+  const j = i+dir;
+  if(j<0||j>=state.leaderboard.length) return;
+  [state.leaderboard[i],state.leaderboard[j]]=[state.leaderboard[j],state.leaderboard[i]];
+  save();
+  renderLeaderboard();
+}
+
+let editIdx = null;
+function openEditModal(i){
+  editIdx=i;
+  const e=state.leaderboard[i];
+  document.getElementById('edit-name').value=e.name||'';
+  document.getElementById('edit-time').value=e.time||'';
+  document.getElementById('edit-note').value=e.note||'';
+  // Convert display date back to YYYY-MM-DD for the input
+  const raw = e.dateRaw || '';
+  document.getElementById('edit-date').value=raw;
+  document.getElementById('edit-modal').classList.add('open');
+}
+function closeEditModal(){ document.getElementById('edit-modal').classList.remove('open'); editIdx=null; }
+function saveEdit(){
+  if(editIdx===null) return;
+  const dateVal = document.getElementById('edit-date').value;
+  state.leaderboard[editIdx].name = document.getElementById('edit-name').value.trim()||state.leaderboard[editIdx].name;
+  state.leaderboard[editIdx].time = document.getElementById('edit-time').value.trim();
+  state.leaderboard[editIdx].note = document.getElementById('edit-note').value.trim();
+  if(dateVal){ state.leaderboard[editIdx].date=formatDate(dateVal); state.leaderboard[editIdx].dateRaw=dateVal; }
+  save();
+  renderLeaderboard();
+  closeEditModal();
+  showToast('Entry updated.');
+}
+
+// Drag and drop
+let dragSrc=null;
+function onDragStart(e,i){ dragSrc=i; e.currentTarget.classList.add('dragging'); }
+function onDragEnd(e){ e.currentTarget.classList.remove('dragging'); document.querySelectorAll('.lb-row').forEach(r=>r.classList.remove('drag-over')); }
+function onDragOver(e,i){ e.preventDefault(); if(dragSrc===null||dragSrc===i) return; document.querySelectorAll('.lb-row').forEach(r=>r.classList.remove('drag-over')); e.currentTarget.classList.add('drag-over'); }
+function onDrop(e,i){ e.preventDefault(); if(dragSrc===null||dragSrc===i) return; const arr=state.leaderboard; const item=arr.splice(dragSrc,1)[0]; arr.splice(i,0,item); dragSrc=null; save(); renderLeaderboard(); }
+
+function renderLeaderboard(){
+  const el = document.getElementById('lb-list');
+  if(state.leaderboard.length===0){
+    el.innerHTML='<div class="empty-state"><i class="ti ti-trophy" aria-hidden="true"></i>No completions logged yet.<br>Generate a challenge and mark it done!</div>';
+    return;
+  }
+  el.innerHTML = state.leaderboard.map((e,i)=>`
+    <div class="lb-row" draggable="true"
+      ondragstart="onDragStart(event,${i})" ondragend="onDragEnd(event)"
+      ondragover="onDragOver(event,${i})" ondrop="onDrop(event,${i})">
+      <i class="ti ti-grip-vertical lb-drag" aria-hidden="true"></i>
+      <span class="lb-medal">${MEDALS[i]||'🏅'}</span>
+      <div class="lb-info">
+        <div class="lb-name">${escHtml(e.name)}</div>
+        <div class="lb-meta">
+          ${e.time?`<span class="lb-time"><i class="ti ti-clock" style="font-size:11px;vertical-align:-1px;"></i> ${escHtml(e.time)}</span>`:''}
+          <span class="lb-sub">${escHtml(e.challenge)}</span>
+          ${e.note?`<span class="lb-note">"${escHtml(e.note)}"</span>`:''}
+        </div>
+      </div>
+      <span class="lb-date">${escHtml(e.date)}</span>
+      <div class="move-btns">
+        <button class="move-btn" onclick="moveLeader(${i},-1)" aria-label="Move up" ${i===0?'disabled':''}><i class="ti ti-chevron-up" aria-hidden="true"></i></button>
+        <button class="move-btn" onclick="moveLeader(${i},1)" aria-label="Move down" ${i===state.leaderboard.length-1?'disabled':''}><i class="ti ti-chevron-down" aria-hidden="true"></i></button>
+      </div>
+      <div class="lb-actions">
+        <button class="lb-icon-btn" onclick="openEditModal(${i})" aria-label="Edit ${escHtml(e.name)}"><i class="ti ti-edit" aria-hidden="true"></i></button>
+        <button class="lb-icon-btn del" onclick="removeLeader(${i})" aria-label="Remove ${escHtml(e.name)}"><i class="ti ti-x" aria-hidden="true"></i></button>
+      </div>
+    </div>`).join('');
+}
+
+document.getElementById('edit-modal').addEventListener('click',function(e){ if(e.target===this) closeEditModal(); });
+
+/* ── DATE TRACKER ── */
+function logActivity(){
+  const dateVal   = document.getElementById('log-date').value;
+  const sportVal  = document.getElementById('log-sport').value;
+  if(!dateVal){ showToast('Please pick a date first.'); return; }
+  const exists = state.activities.find(a=>a.date===dateVal && a.sport===sportVal);
+  if(exists){ showToast('Already logged for this date and sport.'); return; }
+  const challenge = state.currentChallenge ? state.currentChallenge.title : 'Activity';
+  state.activities.push({date:dateVal, sport:sportVal, challenge});
+  save();
+  renderCalendar();
+  renderLoggedList();
+  updateStats();
+  showToast('Activity logged for '+formatDate(dateVal));
+}
+
+function removeActivity(idx){
+  state.activities.splice(idx,1);
+  save();
+  renderCalendar();
+  renderLoggedList();
+  updateStats();
+}
+
+function changeMonth(dir){
+  calendarMonth += dir;
+  if(calendarMonth>11){calendarMonth=0;calendarYear++;}
+  if(calendarMonth<0){calendarMonth=11;calendarYear--;}
+  renderCalendar();
+}
+
+function renderCalendar(){
+  const today      = new Date();
+  const todayStr   = toDateStr(today);
+  const firstDay   = new Date(calendarYear, calendarMonth, 1);
+  const daysInMonth= new Date(calendarYear, calendarMonth+1, 0).getDate();
+  const startDow   = (firstDay.getDay()+6)%7; // Monday=0
+  const loggedDates= new Set(state.activities.map(a=>a.date));
+
+  document.getElementById('month-label').textContent =
+    firstDay.toLocaleDateString('en-GB',{month:'long',year:'numeric'});
+
+  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  let html = days.map(d=>`<div class="day-label">${d}</div>`).join('');
+
+  // blanks before month start
+  for(let i=0;i<startDow;i++) html+=`<div class="day-cell other-month"></div>`;
+
+  for(let d=1;d<=daysInMonth;d++){
+    const ds = `${calendarYear}-${String(calendarMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const isToday   = ds===todayStr;
+    const isLogged  = loggedDates.has(ds);
+    let cls='day-cell';
+    if(isLogged) cls+=' logged';
+    if(isToday)  cls+=' today';
+    html+=`<div class="${cls}" title="${ds}">${d}</div>`;
+  }
+  document.getElementById('tracker-grid').innerHTML=html;
+}
+
+function renderLoggedList(){
+  const el = document.getElementById('logged-list');
+  if(state.activities.length===0){ el.innerHTML=''; return; }
+  const sorted = [...state.activities].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,10);
+  el.innerHTML = sorted.map((a,i)=>`
+    <div class="logged-item">
+      <div>
+        <span class="logged-date">${formatDate(a.date)}</span>
+        <span style="margin:0 6px;color:var(--text-hint)">·</span>
+        <span class="badge badge-${a.sport}" style="font-size:11px;">${SPORT_LABELS[a.sport]||a.sport}</span>
+        <div class="logged-challenge">${escHtml(a.challenge)}</div>
+      </div>
+      <button class="remove-btn" onclick="removeActivity(${state.activities.indexOf(a)})" aria-label="Remove log for ${formatDate(a.date)}"><i class="ti ti-trash" aria-hidden="true"></i></button>
+    </div>`).join('');
+  if(state.activities.length>10){
+    el.innerHTML+=`<div style="font-size:12px;color:var(--text-hint);padding:8px 0;">Showing 10 most recent. Export data to see full history.</div>`;
+  }
+}
+
+/* ── COMPLETED CHALLENGES ── */
+let completedFilter = 'all';
+let completedOpen = false;
+
+function toggleCompleted(){
+  completedOpen = !completedOpen;
+  document.getElementById('completed-section').style.display = completedOpen ? 'block' : 'none';
+  document.getElementById('completed-chevron').className = completedOpen ? 'ti ti-chevron-up' : 'ti ti-chevron-down';
+  if(completedOpen) renderCompletedList();
+}
+
+function setCompletedFilter(f){
+  completedFilter = f;
+  document.querySelectorAll('.cf-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('cf-'+f).classList.add('active');
+  renderCompletedList();
+}
+
+function renderCompletedList(){
+  // Build filter buttons
+  const sports = [...new Set(
+    CHALLENGES.filter(c=>state.completedIds.includes(c.id)).map(c=>c.sport)
+  )];
+  const filterEl = document.getElementById('completed-filters');
+  filterEl.innerHTML = ['all',...sports].map(s=>`
+    <button class="cf-btn ${completedFilter===s?'active':''}" id="cf-${s}" onclick="setCompletedFilter('${s}')">
+      ${s==='all'?'All':SPORT_LABELS[s]}
+    </button>`).join('');
+
+  const done = CHALLENGES.filter(c=>
+    state.completedIds.includes(c.id) &&
+    (completedFilter==='all' || c.sport===completedFilter)
+  );
+  const el = document.getElementById('completed-list');
+  if(done.length===0){
+    el.innerHTML='<div class="empty-state" style="padding:1.25rem;"><i class="ti ti-circle-check" aria-hidden="true"></i>No completed challenges yet for this filter.</div>';
+    return;
+  }
+  const diffClass={Easy:'badge-easy',Medium:'badge-medium',Hard:'badge-hard'};
+  el.innerHTML = done.map(c=>`
+    <div class="completed-item">
+      <div class="completed-check"><i class="ti ti-check" aria-hidden="true"></i></div>
+      <div class="completed-info">
+        <div class="completed-title">${escHtml(c.title)}</div>
+        <div class="completed-meta">
+          <span class="completed-sport badge badge-${c.sport}"><i class="ti ${SPORT_ICONS[c.sport]}" aria-hidden="true"></i> ${SPORT_LABELS[c.sport]}</span>
+          <span class="completed-diff">${c.difficulty} &bull; ${c.distance} &bull; ${c.duration}</span>
+        </div>
+        <button class="completed-load" onclick="loadCompleted(${c.id})">
+          <i class="ti ti-refresh" aria-hidden="true"></i> Load this challenge again
+        </button>
+      </div>
+    </div>`).join('');
+}
+
+function loadCompleted(id){
+  const c = CHALLENGES.find(x=>x.id===id);
+  if(!c) return;
+  state.currentChallenge = c;
+  save();
+  renderChallenge(c);
+  window.scrollTo({top:0,behavior:'smooth'});
+  showToast('Challenge loaded — share or re-attempt it!');
+}
+
+function clearCompleted(){
+  if(state.completedIds.length===0){ showToast('No completed challenges to clear.'); return; }
+  if(!confirm(`Clear all ${state.completedIds.length} completed challenge${state.completedIds.length>1?'s':''}? This cannot be undone.`)) return;
+  state.completedIds=[];
+  save();
+  renderCompletedList();
+  updateStats();
+  // Re-render current challenge card in case it was marked done
+  if(state.currentChallenge) renderChallenge(state.currentChallenge);
+  showToast('Completed challenges cleared.');
+}
+
+/* ── STATS ── */
+function updateStats(){
+  document.getElementById('stat-completed').textContent = state.completedIds.length;
+  document.getElementById('stat-logged').textContent    = state.activities.length;
+  document.getElementById('stat-streak').textContent    = calcStreak();
+}
+
+function calcStreak(){
+  if(state.activities.length===0) return 0;
+  const dates = [...new Set(state.activities.map(a=>a.date))].sort().reverse();
+  let streak=0, check=toDateStr(new Date());
+  for(const d of dates){
+    if(d===check){ streak++; check=prevDay(check); }
+    else if(d<check) break;
+  }
+  return streak;
+}
+
+/* ── SHARE ── */
+const STRAVA_LINKS = {
+  run:  'https://www.strava.com/activities/new?sport_type=Run',
+  ride: 'https://www.strava.com/activities/new?sport_type=Ride',
+  swim: 'https://www.strava.com/activities/new?sport_type=Swim',
+  walk: 'https://www.strava.com/activities/new?sport_type=Walk',
+  yoga: 'https://www.strava.com/activities/new?sport_type=Workout',
+};
+const STRAVA_APP_LINKS = {
+  run:  'strava://activities/new?sport_type=Run',
+  ride: 'strava://activities/new?sport_type=Ride',
+  swim: 'strava://activities/new?sport_type=Swim',
+  walk: 'strava://activities/new?sport_type=Walk',
+  yoga: 'strava://activities/new?sport_type=Workout',
+};
+const SPORT_EMOJIS = {run:'🏃',ride:'🚴',swim:'🏊',walk:'🚶',yoga:'🧘'};
+
+function openShareModal(){
+  const c = state.currentChallenge;
+  if(!c){ showToast('Generate a challenge first!'); return; }
+  const stravaWeb = STRAVA_LINKS[c.sport] || 'https://www.strava.com/athlete/training';
+  const stravaApp = STRAVA_APP_LINKS[c.sport] || 'strava://athlete/training';
+  const emoji = SPORT_EMOJIS[c.sport] || '🏅';
+  const text =
+`${emoji} Strava Challenge: ${c.title}
+
+${c.desc}
+
+📏 ${c.distance}  |  ⏱ ${c.duration}  |  💪 ${c.difficulty}
+
+Done it? Log your activity on Strava here:
+👉 ${stravaWeb}`;
+  document.getElementById('share-text-content').textContent = text;
+  // Set the Strava button — tries app deep link first, falls back to web
+  const stravaBtn = document.getElementById('strava-log-link');
+  stravaBtn.href = stravaWeb;
+  stravaBtn.onclick = function(e){
+    e.preventDefault();
+    // Try to open the app; fall back to web after a short delay
+    const start = Date.now();
+    window.location = stravaApp;
+    setTimeout(()=>{
+      if(Date.now()-start < 1500) window.open(stravaWeb,'_blank');
+    }, 800);
+  };
+  document.getElementById('share-native-btn').style.display =
+    (typeof navigator.share==='function') ? 'flex' : 'none';
+  document.getElementById('share-modal').classList.add('open');
+}
+
+function closeShareModal(){
+  document.getElementById('share-modal').classList.remove('open');
+}
+
+function copyShareText(){
+  const text = document.getElementById('share-text-content').textContent;
+  navigator.clipboard.writeText(text).then(()=>{
+    showToast('Challenge copied to clipboard!');
+    closeShareModal();
+  }).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=text;document.body.appendChild(ta);ta.select();
+    document.execCommand('copy');document.body.removeChild(ta);
+    showToast('Challenge copied to clipboard!');
+    closeShareModal();
+  });
+}
+
+function nativeShare(){
+  const c = state.currentChallenge;
+  if(!c) return;
+  const text = document.getElementById('share-text-content').textContent;
+  navigator.share({title:'Strava Challenge: '+c.title, text}).catch(()=>{});
+}
+
+/* ── EXPORT / IMPORT ── */
+function exportData(){
+  const now = new Date().toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const lbRows = state.leaderboard.length
+    ? state.leaderboard.map((e,i)=>`
+      <tr>
+        <td style="text-align:center;font-size:18px;">${MEDALS[i]||'🏅'}</td>
+        <td><strong>${escHtml(e.name)}</strong></td>
+        <td>${escHtml(e.challenge)}</td>
+        <td>${escHtml(e.sport)}</td>
+        <td>${escHtml(e.time||'—')}</td>
+        <td>${escHtml(e.date)}</td>
+        <td>${escHtml(e.note||'—')}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="7" style="text-align:center;color:#999;">No entries yet</td></tr>';
+
+  const actRows = state.activities.length
+    ? [...state.activities].sort((a,b)=>b.date.localeCompare(a.date)).map(a=>`
+      <tr>
+        <td>${escHtml(formatDate(a.date))}</td>
+        <td>${escHtml(SPORT_LABELS[a.sport]||a.sport)}</td>
+        <td>${escHtml(a.challenge)}</td>
+      </tr>`).join('')
+    : '<tr><td colspan="3" style="text-align:center;color:#999;">No activities logged yet</td></tr>';
+
+  const html = `<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/>
+<title>Strava Challenge Export – ${now}</title>
+<style>
+  body{font-family:system-ui,sans-serif;max-width:800px;margin:2rem auto;padding:0 1rem;color:#1a1a1a;}
+  h1{color:#FC4C02;font-size:24px;margin-bottom:4px;}
+  .meta{color:#888;font-size:13px;margin-bottom:2rem;}
+  h2{font-size:16px;font-weight:600;margin:2rem 0 10px;padding-bottom:6px;border-bottom:2px solid #FC4C02;}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:1rem;}
+  th{background:#f6f5f3;padding:8px 10px;text-align:left;font-weight:600;border-bottom:1px solid #e5e3df;}
+  td{padding:8px 10px;border-bottom:1px solid #f0eeeb;}
+  tr:last-child td{border-bottom:none;}
+  .stat{display:inline-block;background:#fff7f4;border:1px solid #f0c4b0;border-radius:8px;padding:10px 20px;margin:0 8px 8px 0;text-align:center;}
+  .stat-n{font-size:28px;font-weight:700;color:#FC4C02;}
+  .stat-l{font-size:12px;color:#888;}
+</style></head><body>
+<h1>🏅 Strava Challenge Generator</h1>
+<p class="meta">Exported on ${now}</p>
+<div>
+  <div class="stat"><div class="stat-n">${state.completedIds.length}</div><div class="stat-l">Challenges completed</div></div>
+  <div class="stat"><div class="stat-n">${state.activities.length}</div><div class="stat-l">Activities logged</div></div>
+  <div class="stat"><div class="stat-n">${calcStreak()}</div><div class="stat-l">Current streak</div></div>
+</div>
+<h2>🏆 Top 3 Leaderboard</h2>
+<table><thead><tr><th>#</th><th>Name</th><th>Challenge</th><th>Sport</th><th>Time / Distance</th><th>Date</th><th>Note</th></tr></thead>
+<tbody>${lbRows}</tbody></table>
+<h2>📅 Activity Log</h2>
+<table><thead><tr><th>Date</th><th>Sport</th><th>Challenge</th></tr></thead>
+<tbody>${actRows}</tbody></table>
+</body></html>`;
+
+  const blob = new Blob([html], {type:'text/html'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href=url; a.download='strava-challenges-'+toDateStr(new Date())+'.html';
+  document.body.appendChild(a); a.click();
+  document.body.removeChild(a); URL.revokeObjectURL(url);
+  showToast('Exported as a readable HTML report!');
+}
+
+function importData(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = evt=>{
+    try{
+      const payload = JSON.parse(evt.target.result);
+      const imported = payload.data || payload;
+      if(imported.activities && imported.leaderboard){
+        if(confirm('This will replace your current data with the imported file. Continue?')){
+          state = Object.assign(state, imported);
+          save();
+          renderAll();
+          showToast('Data imported successfully!');
+        }
+      } else {
+        showToast('Invalid data file. Please use an exported file.');
+      }
+    }catch(err){
+      showToast('Could not read the file. Is it a valid export?');
+    }
+    e.target.value='';
+  };
+  reader.readAsText(file);
+}
+
+/* ── TOAST ── */
+let toastTimer;
+function showToast(msg){
+  clearTimeout(toastTimer);
+  document.getElementById('toast-text').textContent=msg;
+  document.getElementById('toast').classList.add('show');
+  toastTimer=setTimeout(()=>document.getElementById('toast').classList.remove('show'),3000);
+}
+
+/* ── HELPERS ── */
+function escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function toDateStr(d){
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
+function prevDay(ds){
+  const d=new Date(ds);d.setDate(d.getDate()-1);return toDateStr(d);
+}
+function formatDate(ds){
+  const d=new Date(ds+'T00:00:00');
+  return d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+}
+
+/* ── CLOSE MODAL ON OVERLAY CLICK ── */
+document.getElementById('share-modal').addEventListener('click',function(e){
+  if(e.target===this) closeShareModal();
+});
+
+/* ── INIT ── */
+function renderAll(){
+  if(state.currentChallenge) renderChallenge(state.currentChallenge);
+  renderLeaderboard();
+  renderCalendar();
+  renderLoggedList();
+  updateStats();
+  // Restore active filter button
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  const fb=document.getElementById('f-'+(state.filter||'all'));
+  if(fb) fb.classList.add('active');
+  // Restore difficulty dropdown
+  const dd=document.getElementById('difficulty-select');
+  if(dd) dd.value=state.difficulty||'all';
+  // Set today's date as default in date inputs
+  document.getElementById('log-date').value=toDateStr(new Date());
+  document.getElementById('lb-date-input').value=toDateStr(new Date());
+}
+
+load();
+renderAll();
+</script>
+</body>
+</html>
